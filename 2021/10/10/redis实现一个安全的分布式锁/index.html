@@ -6,19 +6,23 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Hello World | 汤旭晨的博客</title>
+  <title>汤旭晨的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+  <meta name="description" content="title: redis实现一个安全的分布式锁 date: 2021-10-10 14:55:31 tags:  导读 关于redis分布式锁的话题,网上有很多文章,但是大多数文章根本没有把问题讲清楚,所有打算这边文章,把redis分布式锁讲清楚 为什么需要分布式锁 现在的很多业务都是微服务架构,这也意味着一个服务会部署很多进程,本地锁无法解决跨进程会共享资源的竞争问题,所以需要分布式锁来解决这个">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hello World">
-<meta property="og:url" content="http://example.com/2021/10/08/hello-world/index.html">
+<meta property="og:title" content="汤旭晨的博客">
+<meta property="og:url" content="http://example.com/2021/10/10/redis%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA%E5%AE%89%E5%85%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/index.html">
 <meta property="og:site_name" content="汤旭晨的博客">
-<meta property="og:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+<meta property="og:description" content="title: redis实现一个安全的分布式锁 date: 2021-10-10 14:55:31 tags:  导读 关于redis分布式锁的话题,网上有很多文章,但是大多数文章根本没有把问题讲清楚,所有打算这边文章,把redis分布式锁讲清楚 为什么需要分布式锁 现在的很多业务都是微服务架构,这也意味着一个服务会部署很多进程,本地锁无法解决跨进程会共享资源的竞争问题,所以需要分布式锁来解决这个">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2021-10-08T14:50:38.315Z">
-<meta property="article:modified_time" content="2021-10-08T14:50:38.315Z">
+<meta property="og:image" content="c:/Users/11200/AppData/Local/YNote/data/1120019635@qq.com/465421e9cbba4c04b84d5e82fdc68f52/unsafe-lock.png">
+<meta property="og:image" content="c:/Users/11200/AppData/Local/YNote/data/1120019635@qq.com/f16298190fac4febb83e967a4a9c51b3/ncing-tokens.png">
+<meta property="article:published_time" content="2021-10-10T06:55:31.733Z">
+<meta property="article:modified_time" content="2021-10-10T16:00:33.396Z">
 <meta property="article:author" content="John Doe">
+<meta property="article:tag" content="java,数据库,缓存,分布式,云原生">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="c:/Users/11200/AppData/Local/YNote/data/1120019635@qq.com/465421e9cbba4c04b84d5e82fdc68f52/unsafe-lock.png">
   
     <link rel="alternative" href="/atom.xml" title="汤旭晨的博客" type="application/atom+xml">
   
@@ -47,7 +51,7 @@
 <div class="intrude-less">
 	<header id="header" class="inner">
 		<a href="/" class="profilepic">
-			<img src="" class="js-avatar">
+			<img src="https://xingchenpublicimg.oss-cn-beijing.aliyuncs.com/6046128e26d2ce89c7d32a54f24378b6_1.jpg" class="js-avatar">
 		</a>
 		<hgroup>
 		  <h1 class="header-author"><a href="/">汤旭晨</a></h1>
@@ -105,7 +109,7 @@
 	<div class="intrude-less">
 		<header id="header" class="inner">
 			<div class="profilepic">
-				<img src="" class="js-avatar">
+				<img src="https://xingchenpublicimg.oss-cn-beijing.aliyuncs.com/6046128e26d2ce89c7d32a54f24378b6_1.jpg" class="js-avatar">
 			</div>
 			<hgroup>
 			  <h1 class="header-author js-header-author">汤旭晨</h1>
@@ -154,39 +158,61 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-hello-world" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-redis实现一个安全的分布式锁" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 class="article-title" itemprop="name">
-      Hello World
-    </h1>
-  
-
-        
-        <a href="/2021/10/08/hello-world/" class="archive-article-date">
-  	<time datetime="2021-10-08T14:50:38.315Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-08</time>
-</a>
-        
-      </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
+        <p>title: redis实现一个安全的分布式锁 date: 2021-10-10 14:55:31 tags: </p>
+<p><strong>导读</strong></p>
+<p>关于redis分布式锁的话题,网上有很多文章,但是大多数文章根本没有把问题讲清楚,所有打算这边文章,把redis分布式锁讲清楚</p>
+<p><strong>为什么需要分布式锁</strong></p>
+<p>现在的很多业务都是微服务架构,这也意味着一个服务会部署很多进程,本地锁无法解决跨进程会共享资源的竞争问题,所以需要分布式锁来解决这个问题</p>
+<p><strong>单机分布式锁实现</strong></p>
+<p>要实现分布式锁,必须要求redis必须有互斥的能力,可以使用setnx命令,意思就是如果key不存在,才会设置它的值,不然什么都不做,申请成功后,解锁可以使用del命令删除这个key,但是这里存在一个问题,在加锁后解决前进程挂了,就无法自动释放锁了</p>
+<p>很容易想到的方案是申请锁的时候设置一个租期,也就是过期时间,在redis2.8版本中,redis支持setnx和expire指令一起执行(不原子执行的话,在setnx之后expire之前进程挂了依然死锁)</p>
+<p>这里有个问题,锁过期时间如何设置,设置过长会影响服务可用性,过短有可能操作共享资源时间超过了锁过期时间,释放锁的时候也存在释放后一个持有这个锁的进程(快到过期时间释放锁或释放锁的命令遇到网络阻塞很长时间才到达)</p>
+<p>先说如何防止锁被别人释放,在客户端加锁是,设置uuid,在释放锁的时候判断这把锁是否是自己持有,是就释放,判断是释放锁要原子执行(防止获取锁判断时候出现锁超时,而且不原子执行依然可能出现网络阻塞导致误删),可以使用lua脚本来原子执行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">if redis.call(&quot;get&quot;,KEYS[1]) == ARGV[1] then</span><br><span class="line">	return redis.call(&quot;del&quot;,KEYS[1])</span><br><span class="line">else</span><br><span class="line">	return 0</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<p>然后是锁过期问题,redisson的解决方案是启动一个守护线程定时为锁续期,默认是超时时间是30秒,每隔超时时间/3续期1次,但是这里有个问题,续期如果因为网络问题失败的话,主线程无法感知,依然不能保证安全</p>
+<p>单机分布式锁存在可用性问题,如果使用主从集群的话,redis使用异步复制,可能会丢数据,因此,Redis作者提出了红锁</p>
+<p><strong>如何保证redlock安全</strong></p>
+<p>redlock的思想很简单,借鉴了nwr算法的思想,也就是部署5台redis实例(它们之间没有任何关系),写入成功超过半数节点就算写入成功.</p>
+<p>但是有一些问题需要注意</p>
+<p>​    1.时钟漂移</p>
+<p>​    2.网络阻塞</p>
+<p>​    3.时钟跳跃</p>
+<p>​    4.进程长时间停顿</p>
+<p>​    5.部分节点挂了立即重启可能会让锁失效</p>
+<p>在说这些问题之前,先铺垫一点时钟知识</p>
+<p>​    计算机时钟有2种,一个是墙上时钟,一个是单调时钟</p>
+<p>​    1.墙上时钟:linux系统clock_gettime(CLOCK_REALTIME)和java中System.currentTimeMillis()会返回1970年以来的秒数和毫秒数,墙上时钟可以和ntp同步,但是时钟和ntp服务器出现误差大和网络阻塞,有可能会出现较大的时钟回拨或跳跃,精度不高</p>
+<p>​    2.单调时钟:linux上clock_gettime(CLOCK_MONOTONIC)和java中的System.nanoTime()采用cpu计时器,它是电脑启动以后经历的纳秒,单调时钟不会出现时钟回拨和跳跃,如果时间被时间服务器更快或更慢,默认情况下,容许速率加快或减慢最大幅度为0.05%,精度非常高</p>
+<p>进入正题</p>
+<p>​    先说时钟漂移,指的是可能会因为网络原因,加锁请求到每个节点的时候时钟不一致,如节点1,第0秒,节点2,第1秒,并且为了防止网络阻塞导致互斥失效,从获取锁之前就先获取当前时间,操作共享资源之前判断剩余时间决定要不要操作</p>
+<p>加锁过程(摘自redis官网)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">为了取到锁，客户端应该执行以下操作:</span><br><span class="line">获取当前Unix时间，以毫秒为单位。(安全起见,建议使用单调时间)</span><br><span class="line">依次尝试从N个实例，使用相同的key和随机值获取锁。在步骤2，当向Redis设置锁时,客户端应该设置一个网络连接和响应超时时间，这个超时时间应该小于锁的失效时间。例如你的锁自动失效时间为10秒，则超时时间应该在5-50毫秒之间。这样可以避免服务器端Redis已经挂掉的情况下，客户端还在死死地等待响应结果。如果服务器端没有在规定时间内响应，客户端应该尽快尝试另外一个Redis实例。</span><br><span class="line">客户端使用当前时间减去开始获取锁时间（步骤1记录的时间）就得到获取锁使用的时间。当且仅当从大多数（这里是3个节点）的Redis节点都取到锁，并且使用的时间小于锁失效时间时，锁才算获取成功。</span><br><span class="line">如果取到了锁，key的真正有效时间等于有效时间减去获取锁所使用的时间（步骤3计算的结果）。</span><br><span class="line">如果因为某些原因，获取锁失败（没有在至少N/2+1个Redis实例取到锁或者取锁时间已经超过了有效时间），客户端应该在所有的Redis实例上进行解锁（即便某些Redis实例根本就没有加锁成功）。</span><br></pre></td></tr></table></figure>
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+<p>时钟跳跃问题是指, redis超时用的是墙上时间(如果用单调掉电重启没办法判断key的超时)墙上时钟可能会出现时钟跳跃,导致key提前过期,这个需要基础设施保证</p>
+<p>进程长时间停顿问题是指,进程持有锁准备操作共享资源,出现了长时间停顿(在判断时间之后操作共享资源之前),可能会导致锁失效,如下图</p>
+<p><img src="C:\Users\11200\AppData\Local\YNote\data\1120019635@qq.com\465421e9cbba4c04b84d5e82fdc68f52\unsafe-lock.png" alt="img"></p>
+<p>关于这个问题如何解决,Martin给出了一种方法，称为fencing token。fencing token是一个单调递增的数字，当客户端成功获取锁的时候它随同锁一起返回给客户端。而客户端访问共享资源的时候带着这个fencing token，这样提供共享资源的服务就能根据它进行检查，拒绝掉延迟到来的访问请求（避免了冲突）。如下图： </p>
+<p><img src="C:\Users\11200\AppData\Local\YNote\data\1120019635@qq.com\f16298190fac4febb83e967a4a9c51b3\ncing-tokens.png" alt="img"></p>
+<p>但是我不太认可这种方法,首先这种超出了分布式锁的范围(必须要侵入资源服务器),而且这种方法并不能保证顺序,举个反例</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">客户端1发出请求</span><br><span class="line">客户端2发出请求</span><br><span class="line">客户端2获取到锁和token1</span><br><span class="line">客户端2写资源服务器</span><br><span class="line">客户端1获取到锁和token2</span><br><span class="line">客户端1写资源服务器</span><br></pre></td></tr></table></figure>
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+<p>而且也不能保证互斥</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">客户端1发出请求</span><br><span class="line">客户端2发出请求</span><br><span class="line">客户端1获取到锁和token1</span><br><span class="line">客户端1停止</span><br><span class="line">客户端1醒来了(锁超时了)</span><br><span class="line">客户端2获取到锁token2</span><br><span class="line">客户端1写资源服务器</span><br><span class="line">客户端2写资源服务器</span><br></pre></td></tr></table></figure>
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+<p>资源服务器必须独立实现保证互斥的机制才能保证安全,那这样分布式锁的存在就失去了意义</p>
+<p>对于java进程来说,gc停顿是可以解决的,如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">//获取时间</span><br><span class="line">//业务逻辑</span><br><span class="line">for(int i = 0;i &lt; 1;i++)&#123;</span><br><span class="line">	//获取时间判断</span><br><span class="line">	//操作共享资源</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>jvm gc必须要在按安全点才可以gc,对于int类型的循环次数无法插入安全点(可以参考深入理解java虚拟机第五章调优案例)</p>
+<p>进程停顿可能的原因很多,但是所有分布式锁都存在这个问题</p>
+<p>部分节点挂了立即重启可能会让锁失效,举个例子,进程1持有redis实例1,2,3,进程2持有redis实例4,5,实例1突然挂了重启,实例1的锁还没有持久化,进程2获取到锁,可以当redis重启后一定时间不能参与当前活动解决</p>
+<p>(完)</p>
 
       
 
@@ -266,7 +292,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2021/10/08/hello-world/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2021/10/10/redis%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA%E5%AE%89%E5%85%A8%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/" alt="微信分享二维码">
     </div>
 </div>
 
