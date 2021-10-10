@@ -158,8 +158,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>title: redis实现一个安全的分布式锁 date: 2021-10-10 14:55:31 tags: </p>
-<p><strong>导读</strong></p>
+        <h3 id="redis实现一个安全的分布式锁"><a href="#redis实现一个安全的分布式锁" class="headerlink" title="redis实现一个安全的分布式锁"></a>redis实现一个安全的分布式锁</h3><p><strong>导读</strong></p>
 <p>关于redis分布式锁的话题,网上有很多文章,但是大多数文章根本没有把问题讲清楚,所有打算这边文章,把redis分布式锁讲清楚</p>
 <p><strong>为什么需要分布式锁</strong></p>
 <p>现在的很多业务都是微服务架构,这也意味着一个服务会部署很多进程,本地锁无法解决跨进程会共享资源的竞争问题,所以需要分布式锁来解决这个问题</p>
@@ -191,9 +190,9 @@
 
 <p>时钟跳跃问题是指, redis超时用的是墙上时间(如果用单调掉电重启没办法判断key的超时)墙上时钟可能会出现时钟跳跃,导致key提前过期,这个需要基础设施保证</p>
 <p>进程长时间停顿问题是指,进程持有锁准备操作共享资源,出现了长时间停顿(在判断时间之后操作共享资源之前),可能会导致锁失效,如下图</p>
-<p><img src="C:\Users\11200\AppData\Local\YNote\data\1120019635@qq.com\465421e9cbba4c04b84d5e82fdc68f52\unsafe-lock.png" alt="img"></p>
+<p><img src="https://xingchenpublicimg.oss-cn-beijing.aliyuncs.com/unsafe-lock.png" alt="img"> </p>
 <p>关于这个问题如何解决,Martin给出了一种方法，称为fencing token。fencing token是一个单调递增的数字，当客户端成功获取锁的时候它随同锁一起返回给客户端。而客户端访问共享资源的时候带着这个fencing token，这样提供共享资源的服务就能根据它进行检查，拒绝掉延迟到来的访问请求（避免了冲突）。如下图： </p>
-<p><img src="C:\Users\11200\AppData\Local\YNote\data\1120019635@qq.com\f16298190fac4febb83e967a4a9c51b3\ncing-tokens.png" alt="img"></p>
+<p><img src="https://xingchenpublicimg.oss-cn-beijing.aliyuncs.com/fencing-tokens.png" alt="img"></p>
 <p>但是我不太认可这种方法,首先这种超出了分布式锁的范围(必须要侵入资源服务器),而且这种方法并不能保证顺序,举个反例</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">客户端1发出请求</span><br><span class="line">客户端2发出请求</span><br><span class="line">客户端2获取到锁和token1</span><br><span class="line">客户端2写资源服务器</span><br><span class="line">客户端1获取到锁和token2</span><br><span class="line">客户端1写资源服务器</span><br></pre></td></tr></table></figure>
 
